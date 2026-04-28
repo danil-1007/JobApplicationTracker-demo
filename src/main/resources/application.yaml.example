@@ -1,0 +1,13 @@
+server:
+  port: 1703
+
+spring:
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/job
+    username: postgres
+    password: YOUR_PASSWORD_HERE
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true

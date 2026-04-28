@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+
+    <div class="container mt-3">
+        <h3>Users</h3>
+
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Email</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="u : ${users}">
+                <td th:text="${u.email}">email</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+</body>
+</html>

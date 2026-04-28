@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>JobApplication</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+<body class="p-4">
+
+<div class="container" style="max-width: 520px;">
+    <h1 class="h4 mb-3">Add job application</h1>
+
+    <form th:action="@{/addApp}" method="post">
+        <table>
+            <tr>
+                <td>Company</td>
+                <td><input name="company" type="text" required></td>
+            </tr>
+            <tr>
+                <td>Job title</td>
+                <td><input name="jobTitle" type="text" required></td>
+            </tr>
+            <tr>
+                <td>Status</td>
+                <td>
+                    <select name="status" required>
+                        <option value="" disabled selected>Select status</option>
+                        <option th:each="s : ${statuses}"
+                                th:value="${s.name()}"
+                                th:text="${s}"></option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2"><input type="submit" value="Submit"></td>
+            </tr>
+        </table>
+    </form>
+</div>
+
+</body>
+</html>

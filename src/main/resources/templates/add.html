@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+<body>
+
+    <form action="/add" method="post">
+        <table>
+            <tr>
+                <td>E-mail </td>
+                <td><input name="email"></td>
+            </tr>
+            <tr>
+                <td>Password</td>
+                <td> <input name="password"> </td>
+            </tr>
+            <td colspan="2"><input type="submit"></td>
+        </table>
+    </form>
+
+    <div class="container mt-3">
+        <div class="alert alert-success" th:if="${user != null}">
+            Saved user: <span th:text="${user.email}"></span>
+        </div>
+    </div>
+
+
+</body>
+</html>
