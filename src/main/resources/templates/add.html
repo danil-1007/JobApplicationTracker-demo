@@ -1,32 +1,45 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <title>Sign up</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 </head>
-<body>
+<body class="p-4">
 
-    <form action="/add" method="post">
+<div class="container" style="max-width: 520px;">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h4 mb-0">Sign up</h1>
+        <a class="btn btn-sm btn-outline-secondary" th:href="@{/login}">Sign in</a>
+    </div>
+
+    <form th:action="@{/add}" th:object="${signup}" method="post">
         <table>
             <tr>
-                <td>E-mail </td>
-                <td><input name="email"></td>
+                <td>E-mail</td>
+                <td>
+                    <input type="email" th:field="*{email}">
+                    <div class="text-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                </td>
             </tr>
             <tr>
                 <td>Password</td>
-                <td> <input name="password"> </td>
+                <td>
+                    <input type="password" th:field="*{password}">
+                    <div class="text-danger" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+                </td>
             </tr>
-            <td colspan="2"><input type="submit"></td>
+            <tr>
+                <td colspan="2"><input type="submit" class="btn btn-primary" value="Sign up"></td>
+            </tr>
         </table>
     </form>
 
-    <div class="container mt-3">
-        <div class="alert alert-success" th:if="${user != null}">
-            Saved user: <span th:text="${user.email}"></span>
-        </div>
+    <div class="alert alert-success mt-3" th:if="${user != null}">
+        Saved user: <span th:text="${user.email}"></span>
     </div>
-
+</div>
 
 </body>
 </html>
