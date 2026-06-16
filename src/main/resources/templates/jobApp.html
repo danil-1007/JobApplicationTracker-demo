@@ -2,41 +2,63 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>JobApplication</title>
+    <title>Job Application</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
           integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 </head>
 <body class="p-4">
 
 <div class="container" style="max-width: 520px;">
-    <h1 class="h4 mb-3">Add job application</h1>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h4 mb-0">Add job application</h1>
+        <div>
+            <a class="btn btn-sm btn-outline-secondary" th:href="@{/showApps}">View applications</a>
+            <form th:action="@{/logout}" method="post" class="d-inline ml-2">
+                <button type="submit" class="btn btn-sm btn-outline-secondary">Sign out</button>
+            </form>
+        </div>
+    </div>
 
-    <form th:action="@{/addApp}" method="post">
+    <form th:action="@{/addApp}" th:object="${jobApp}" method="post">
         <table>
             <tr>
                 <td>Company</td>
-                <td><input name="company" type="text" required></td>
+                <td>
+                    <input type="text" th:field="*{company}">
+                    <div class="text-danger" th:if="${#fields.hasErrors('company')}" th:errors="*{company}"></div>
+                </td>
             </tr>
             <tr>
                 <td>Job title</td>
-                <td><input name="jobTitle" type="text" required></td>
+                <td>
+                    <input type="text" th:field="*{jobTitle}">
+                    <div class="text-danger" th:if="${#fields.hasErrors('jobTitle')}" th:errors="*{jobTitle}"></div>
+                </td>
             </tr>
             <tr>
                 <td>Status</td>
                 <td>
-                    <select name="status" required>
-                        <option value="" disabled selected>Select status</option>
+                    <select th:field="*{status}">
+                        <option value="" disabled>Select status</option>
                         <option th:each="s : ${statuses}"
                                 th:value="${s.name()}"
                                 th:text="${s}"></option>
                     </select>
+                    <div class="text-danger" th:if="${#fields.hasErrors('status')}" th:errors="*{status}"></div>
                 </td>
             </tr>
             <tr>
-                <td colspan="2"><input type="submit" value="Submit"></td>
+                <td colspan="2"><input type="submit" class="btn btn-primary" value="Submit"></td>
             </tr>
         </table>
     </form>
+
+    <div class="alert alert-success mt-3" th:if="${app != null}">
+        Saved application:
+        <span th:text="${app.company.companyName}"></span> —
+        <span th:text="${app.jobTitle}"></span>
+        (<span th:text="${app.status}"></span>)
+    </div>
 </div>
 
 </body>

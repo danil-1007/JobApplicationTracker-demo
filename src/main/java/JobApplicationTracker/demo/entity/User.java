@@ -2,6 +2,9 @@ package JobApplicationTracker.demo.entity;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,8 +24,13 @@ public class User {
     private UUID id;
 
     @Column(unique = true)
+    @NotBlank(message = "Email is required")
+    @Email(message = "Must be a valid email")
     private String email;
 
+
+    @NotBlank
+    @Size(min = 8, max = 64, message = "Password must be 8–64 characters")
     private String password;
 
     @OneToMany(mappedBy = "user")
