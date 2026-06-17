@@ -8,10 +8,14 @@ import JobApplicationTracker.demo.repos.CompanyRepository;
 import JobApplicationTracker.demo.repos.JobRepository;
 import JobApplicationTracker.demo.repos.UserRepository;
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class ApplicationService {
@@ -79,5 +83,37 @@ public class ApplicationService {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepo.findByEmail(email)
                 .orElseThrow(() -> new IllegalStateException("Signed-in user not found"));
+    }
+
+    public void deleteApplication(UUID id) {
+        JobApplication app = jobRepo.findByIdAndUser(id, getCurrentUser())
+                        .orElseThrow(() ->new IllegalArgumentException("Application not found"));
+        jobRepo.delete(app);
+    }
+
+
+    public JobApplication getApplicationForCurrentUser(UUID id) {
+        return jobRepo.findByIdAndUser(id, getCurrentUser())
+                .orElseThrow(() ->new IllegalArgumentException("Application not found"));
+    }
+
+    @Transactional
+    public JobApplication updateApplication(UUID id, String companyName, String jobTitle, ApplicationStatus status) {
+        JobApplication app = getApplicationForCurrentUser(id);
+
+        String name = companyName.trim();
+        Company company = companyRepo.findByCompanyNameIgnoreCase(name)
+                .orElseGet(() -> {
+                    Company c = new Company();
+                    c.setCompanyName(name);
+                    return companyRepo.save(c);
+                });
+
+        app.setCompany(company);
+        app.setJobTitle(jobTitle.trim());
+        app.setStatus(status);
+
+        return jobRepo.save(app);
+
     }
 }
