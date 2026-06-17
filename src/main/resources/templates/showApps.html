@@ -29,6 +29,7 @@
             <th>Company</th>
             <th>Job title</th>
             <th>Status</th>
+            <th></th>
         </tr>
         </thead>
         <tbody>
@@ -36,6 +37,16 @@
             <td th:text="${a.company.companyName}">company</td>
             <td th:text="${a.jobTitle}">jobTitle</td>
             <td th:text="${a.status}">status</td>
+            <td>
+                <a class="btn btn-sm btn-outline-primary"
+                   th:href="@{/applications/{id}/edit(id=${a.id})}">Edit</a>
+                <form th:action="@{/applications/{id}/delete(id=${a.id})}" method="post" class="d-inline mb-0 ml-1">
+                    <button type="submit" class="btn btn-sm btn-danger"
+                            onclick="return confirm('Delete this application?');">
+                        Delete
+                    </button>
+                </form>
+            </td>
         </tr>
         </tbody>
     </table>

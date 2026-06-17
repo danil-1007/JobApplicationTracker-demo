@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface JobRepository extends JpaRepository<JobApplication, UUID>{
@@ -21,4 +22,6 @@ public interface JobRepository extends JpaRepository<JobApplication, UUID>{
 
     @EntityGraph(attributePaths = {"user", "company"})
     List<JobApplication> findByUser(User user);
+
+    Optional<JobApplication> findByIdAndUser(UUID id, User user);
 }
