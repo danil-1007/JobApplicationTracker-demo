@@ -19,7 +19,9 @@ public class UserService {
         this.userRepo = userRepo;
         this.passwordEncoder = passwordEncoder;
     }
-
+    /**
+     Keep @Transactional on saveUser (and on multi-step methods in ApplicationService).
+     */
     @Transactional
     public User saveUser(String email, String password) {
         String trimmedEmail = email == null ? "" : email.trim();
@@ -35,10 +37,7 @@ public class UserService {
         return userRepo.save(user);
     }
 
-    /**3. @Transactional on getAllUsers()
-     Not wrong, but unnecessary for a single findAll().
-     Keep @Transactional on saveUser (and on multi-step methods in ApplicationService).
-     */
+
     public List<User> getAllUsers() {
         return userRepo.findAll();
     }
