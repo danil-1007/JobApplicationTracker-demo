@@ -1,5 +1,6 @@
 package JobApplicationTracker.demo.services;
 
+import JobApplicationTracker.demo.entity.Role;
 import JobApplicationTracker.demo.entity.User;
 import JobApplicationTracker.demo.repos.UserRepository;
 import jakarta.transaction.Transactional;
@@ -33,6 +34,7 @@ public class UserService {
             throw new IllegalArgumentException("Email already exists");
 
         User user = new User(trimmedEmail, passwordEncoder.encode(password));
+        user.setRole(Role.USER);
 
         return userRepo.save(user);
     }

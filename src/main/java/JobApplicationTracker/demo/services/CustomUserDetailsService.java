@@ -1,5 +1,6 @@
 package JobApplicationTracker.demo.services;
 
+import JobApplicationTracker.demo.entity.Role;
 import JobApplicationTracker.demo.repos.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -21,8 +22,9 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .map(user -> org.springframework.security.core.userdetails.User
                         .withUsername(user.getEmail())
                         .password(user.getPassword())
-                        .roles("USER")
+                        .roles(user.getRole() != null ? user.getRole().name() : Role.USER.name())
                         .build())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
     }
+
 }
