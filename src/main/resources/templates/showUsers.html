@@ -1,41 +1,52 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Users</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-</head>
-<body class="p-4">
+<head th:replace="~{fragments/layout :: head(title='Users')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar(active='users')}"></nav>
 
-<div class="container" style="max-width: 720px;">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="h4 mb-0">Users</h1>
-        <div>
-            <a class="btn btn-sm btn-primary" th:href="@{/add}">Add user</a>
-            <form th:action="@{/logout}" method="post" class="d-inline ml-2">
-                <button type="submit" class="btn btn-sm btn-outline-secondary">Sign out</button>
-            </form>
+<main class="container py-4" style="max-width: 720px;">
+    <div class="page-header">
+        <h1>Users</h1>
+        <a class="btn btn-primary" th:href="@{/add}">+ Add user</a>
+    </div>
+
+    <div class="page-card">
+        <div class="alert alert-info mb-0" th:if="${#lists.isEmpty(users)}">
+            No users yet. <a th:href="@{/add}">Add your first one</a>.
+        </div>
+
+        <div class="table-responsive" th:unless="${#lists.isEmpty(users)}">
+            <table class="table table-app align-middle mb-0">
+                <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="u : ${users}">
+                    <td th:text="${u.email}">email</td>
+                    <td>
+                        <span th:if="${u.role?.name() == 'ADMIN'}" class="status-badge status-offer">Admin</span>
+                        <span th:unless="${u.role?.name() == 'ADMIN'}" class="status-badge status-applied">User</span>
+                    </td>
+                    <td class="text-end">
+                        <form th:if="${u.role?.name() != 'ADMIN'}"
+                              th:action="@{/users/{id}/promote(id=${u.id})}" method="post" class="d-inline mb-0">
+                            <button type="submit" class="btn btn-sm btn-outline-primary"
+                                    onclick="return confirm('Make this user an admin?');">
+                                Make admin
+                            </button>
+                        </form>
+                        <span th:unless="${u.role?.name() != 'ADMIN'}" class="text-muted-sm">—</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
         </div>
     </div>
-
-    <div class="alert alert-info" th:if="${#lists.isEmpty(users)}">
-        No users yet. <a th:href="@{/add}">Add your first one</a>.
-    </div>
-
-    <table class="table table-striped table-bordered mb-0" th:unless="${#lists.isEmpty(users)}">
-        <thead class="thead-light">
-        <tr>
-            <th>Email</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="u : ${users}">
-            <td th:text="${u.email}">email</td>
-        </tr>
-        </tbody>
-    </table>
-</div>
+</main>
 
 </body>
 </html>
