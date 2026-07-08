@@ -1,56 +1,63 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Applications</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-</head>
-<body class="p-4">
+<head th:replace="~{fragments/layout :: head(title='Applications')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar(active='apps')}"></nav>
 
-<div class="container" style="max-width: 720px;">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="h4 mb-0">Applications</h1>
+<main class="container py-4" style="max-width: 860px;">
+    <div class="page-header">
         <div>
-            <a class="btn btn-sm btn-primary" th:href="@{/addApp}">Add application</a>
-            <form th:action="@{/logout}" method="post" class="d-inline ml-2">
-                <button type="submit" class="btn btn-sm btn-outline-secondary">Sign out</button>
-            </form>
+            <h1>Applications</h1>
+            <div class="text-muted-sm" th:unless="${#lists.isEmpty(applications)}"
+                 th:text="${#lists.size(applications)} + ' application(s) tracked'"></div>
+        </div>
+        <a class="btn btn-primary" th:href="@{/addApp}">+ Add application</a>
+    </div>
+
+    <div class="page-card">
+        <div class="alert alert-info mb-0" th:if="${#lists.isEmpty(applications)}">
+            No applications yet. <a th:href="@{/addApp}">Add your first one</a>.
+        </div>
+
+        <div class="table-responsive" th:unless="${#lists.isEmpty(applications)}">
+            <table class="table table-app align-middle mb-0">
+                <thead>
+                <tr>
+                    <th>Company</th>
+                    <th>Job title</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="a : ${applications}">
+                    <td th:text="${a.company.companyName}">company</td>
+                    <td th:text="${a.jobTitle}">jobTitle</td>
+                    <td>
+                        <span th:switch="${a.status.name()}">
+                            <span th:case="'APPLIED'" class="status-badge status-applied">Applied</span>
+                            <span th:case="'INTERVIEW'" class="status-badge status-interview">Interview</span>
+                            <span th:case="'OFFER'" class="status-badge status-offer">Offer</span>
+                            <span th:case="'REJECTED'" class="status-badge status-rejected">Rejected</span>
+                            <span th:case="*" class="status-badge" th:text="${a.status}">status</span>
+                        </span>
+                    </td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-outline-primary"
+                           th:href="@{/applications/{id}/edit(id=${a.id})}">Edit</a>
+                        <form th:action="@{/applications/{id}/delete(id=${a.id})}" method="post" class="d-inline mb-0 ms-1">
+                            <button type="submit" class="btn btn-sm btn-outline-danger"
+                                    onclick="return confirm('Delete this application?');">
+                                Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
         </div>
     </div>
-
-    <div class="alert alert-info" th:if="${#lists.isEmpty(applications)}">
-        No applications yet. <a th:href="@{/addApp}">Add your first one</a>.
-    </div>
-
-    <table class="table table-striped table-bordered mb-0" th:unless="${#lists.isEmpty(applications)}">
-        <thead class="thead-light">
-        <tr>
-            <th>Company</th>
-            <th>Job title</th>
-            <th>Status</th>
-            <th></th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="a : ${applications}">
-            <td th:text="${a.company.companyName}">company</td>
-            <td th:text="${a.jobTitle}">jobTitle</td>
-            <td th:text="${a.status}">status</td>
-            <td>
-                <a class="btn btn-sm btn-outline-primary"
-                   th:href="@{/applications/{id}/edit(id=${a.id})}">Edit</a>
-                <form th:action="@{/applications/{id}/delete(id=${a.id})}" method="post" class="d-inline mb-0 ml-1">
-                    <button type="submit" class="btn btn-sm btn-danger"
-                            onclick="return confirm('Delete this application?');">
-                        Delete
-                    </button>
-                </form>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-</div>
+</main>
 
 </body>
 </html>
