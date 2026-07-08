@@ -28,7 +28,7 @@ public class User {
     @Email(message = "Must be a valid email")
     private String email;
 
-    @Enumerated
+    @Enumerated(EnumType.ORDINAL)
     private Role role;
 
 
