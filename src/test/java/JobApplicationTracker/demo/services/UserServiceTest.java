@@ -1,6 +1,7 @@
 package JobApplicationTracker.demo.services;
 
 
+import JobApplicationTracker.demo.entity.Role;
 import JobApplicationTracker.demo.entity.User;
 import JobApplicationTracker.demo.repos.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -138,5 +140,32 @@ class UserServiceTest {
 
         // ASSERT
         assertThat(result).isEmpty();
+    }
+
+    @Test
+    void promoteToAdmin_shouldSetAdminRole_whenUserExists(){
+        //ARRANGE
+        UUID id = UUID.randomUUID();
+
+        when(userRepo.findById(id)).thenReturn(Optional.of(testUser));
+
+        //ACT
+        userService.promoteToAdmin(id);
+
+        //ASSERT
+        assertThat(testUser.getRole()).isEqualTo(Role.ADMIN);
+        verify(userRepo, times(1)).save(testUser);
+    }
+
+    @Test
+    void promoteToAdmin_shouldThrow_whenUserNotFound(){
+        //ARRANGE
+        UUID id = UUID.randomUUID();
+        when(userRepo.findById(id)).thenReturn(Optional.empty());
+
+        //ACT + ASSERT
+        assertThatThrownBy(()->userService.promoteToAdmin(id))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("User not found: "+ id);
     }
 }
