@@ -1,8 +1,10 @@
 package JobApplicationTracker.demo.services;
 
+import JobApplicationTracker.demo.entity.ApplicationStatus;
 import JobApplicationTracker.demo.entity.Company;
 import JobApplicationTracker.demo.entity.JobApplication;
 import JobApplicationTracker.demo.entity.User;
+import JobApplicationTracker.demo.repos.CompanyRepository;
 import JobApplicationTracker.demo.repos.JobRepository;
 import JobApplicationTracker.demo.repos.UserRepository;
 import org.springframework.security.core.Authentication;
@@ -35,6 +37,9 @@ class ApplicationServiceTest {
     private JobRepository jobRepo;
 
     @Mock
+    private CompanyRepository companyRepo;
+
+    @Mock
     private PasswordEncoder passwordEncoder;
 
     @InjectMocks
@@ -57,10 +62,6 @@ class ApplicationServiceTest {
         testUser = new User("test@example.com", "encodedPassword");
         testCompany = new Company();
         testCompany.setCompanyName("Google");
-    }
-
-    @Test
-    void saveApplication() {
     }
 
     @Test
@@ -182,6 +183,149 @@ class ApplicationServiceTest {
     }
 
     @Test
-    void updateApplication() {
+    void updateApplication_shouldUpdateFields() {
+        UUID id = UUID.randomUUID();
+
+        JobApplication existingApp  = new JobApplication();
+        existingApp.setUser(testUser);
+        existingApp.setJobTitle("Old Title");
+        existingApp.setStatus(ApplicationStatus.APPLIED);
+
+        when(userRepo.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
+        when(jobRepo.findByIdAndUser(id, testUser)).thenReturn(Optional.of(existingApp));
+        when(companyRepo.findByCompanyNameIgnoreCase("Google")).thenReturn(Optional.of(testCompany));
+        when(jobRepo.save(existingApp)).thenReturn(existingApp);
+
+        // ACT
+        JobApplication result = applicationService.updateApplication(id, "Google", "New Title", ApplicationStatus.INTERVIEW);
+
+        // ASSERT
+        assertThat(result.getJobTitle()).isEqualTo("New Title");
+        assertThat(result.getCompany()).isEqualTo(testCompany);
+        assertThat(result.getStatus()).isEqualTo(ApplicationStatus.INTERVIEW);
+
+    }
+
+    @Test
+    void updateApplication_shouldReuseExistingCompany(){
+        //ARRANGE
+        UUID id = UUID.randomUUID();
+
+        JobApplication existingApp = new JobApplication();
+        existingApp.setUser(testUser);
+
+        when(userRepo.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
+        when(jobRepo.findByIdAndUser(id, testUser)).thenReturn(Optional.of(existingApp));
+        when(companyRepo.findByCompanyNameIgnoreCase("Google")).thenReturn(Optional.of(testCompany));
+        when(jobRepo.save(existingApp)).thenReturn(existingApp);
+
+        //ACT
+        applicationService.updateApplication(id,"Google", "Title", ApplicationStatus.APPLIED);
+
+        //ASSERT
+        verify(companyRepo, never()).save(any());
+
+    }
+
+    @Test
+    void updateApplication_shouldCreateNewCompany_whenNotFound(){
+        //ARRANGE
+        UUID id = UUID.randomUUID();
+
+        JobApplication existingApp = new JobApplication();
+        existingApp.setUser(testUser);
+
+        when(userRepo.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
+        when(jobRepo.findByIdAndUser(id, testUser)).thenReturn(Optional.of(existingApp));
+        when(companyRepo.findByCompanyNameIgnoreCase("Google")).thenReturn(Optional.empty());
+        when(companyRepo.save(any(Company.class))).thenReturn(testCompany);
+        when(jobRepo.save(existingApp)).thenReturn(existingApp);
+
+        //ACT
+        applicationService.updateApplication(id, "Google", "title", ApplicationStatus.INTERVIEW);
+
+        //ASSERT
+
+        verify(companyRepo, times(1)).save(any(Company.class));
+    }
+
+    @Test
+    void updateApplication_shouldThrow_whenAppNotFound(){
+        //ARRANGE
+        UUID id = UUID.randomUUID();
+
+        JobApplication app = new JobApplication();
+        app.setUser(testUser);
+
+        when(userRepo.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
+        when(jobRepo.findByIdAndUser(id, testUser)).thenReturn(Optional.empty());
+
+        //ACT + ASSERT
+        assertThatThrownBy(() -> applicationService.updateApplication(id, "Google", "Java Developer", ApplicationStatus.APPLIED))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Application not found");
+
+        verify(jobRepo, never()).save(any());
+        verify(companyRepo, never()).save(any());
+    }
+    @Test
+    void saveApplication_shouldSaveApp_whenCompanyExists() {
+        // ARRANGE
+        when(userRepo.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
+        when(companyRepo.findByCompanyNameIgnoreCase("Google")).thenReturn(Optional.of(testCompany));
+        when(jobRepo.save(any(JobApplication.class))).thenAnswer(i -> i.getArgument(0));
+
+        // ACT
+        JobApplication result = applicationService.saveApplication("Google", "Java Developer", ApplicationStatus.APPLIED);
+
+        // ASSERT
+        assertThat(result).isNotNull();
+        assertThat(result.getCompany()).isEqualTo(testCompany);
+        verify(companyRepo, never()).save(any());
+    }
+
+    @Test
+    void saveApplication_shouldCreateNewCompany_whenCompanyNotFound() {
+        // ARRANGE
+        when(userRepo.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
+        when(companyRepo.findByCompanyNameIgnoreCase("Google")).thenReturn(Optional.empty());
+        when(companyRepo.save(any(Company.class))).thenReturn(testCompany);
+        when(jobRepo.save(any(JobApplication.class))).thenAnswer(i -> i.getArgument(0));
+
+        // ACT
+        JobApplication result = applicationService.saveApplication("Google", "Java Developer", ApplicationStatus.APPLIED);
+
+        // ASSERT
+        assertThat(result).isNotNull();
+        verify(companyRepo, times(1)).save(any(Company.class));
+    }
+
+    @Test
+    void saveApplication_shouldTrimCompanyNameAndJobTitle() {
+        // ARRANGE
+        when(userRepo.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
+        when(companyRepo.findByCompanyNameIgnoreCase("Google")).thenReturn(Optional.of(testCompany));
+        when(jobRepo.save(any(JobApplication.class))).thenAnswer(i -> i.getArgument(0));
+
+        // ACT
+        JobApplication result = applicationService.saveApplication("  Google  ", "  Java Developer  ", ApplicationStatus.APPLIED);
+
+        // ASSERT
+        assertThat(result.getJobTitle()).isEqualTo("Java Developer");
+        verify(companyRepo).findByCompanyNameIgnoreCase("Google"); // trimmed, no spaces
+    }
+
+    @Test
+    void saveApplication_shouldAssignCurrentUserToApp() {
+        // ARRANGE
+        when(userRepo.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
+        when(companyRepo.findByCompanyNameIgnoreCase("Google")).thenReturn(Optional.of(testCompany));
+        when(jobRepo.save(any(JobApplication.class))).thenAnswer(i -> i.getArgument(0));
+
+        // ACT
+        JobApplication result = applicationService.saveApplication("Google", "Java Developer", ApplicationStatus.APPLIED);
+
+        // ASSERT
+        assertThat(result.getUser()).isEqualTo(testUser);
     }
 }
