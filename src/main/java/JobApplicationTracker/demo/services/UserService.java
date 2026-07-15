@@ -1,5 +1,6 @@
 package JobApplicationTracker.demo.services;
 
+import JobApplicationTracker.demo.entity.Role;
 import JobApplicationTracker.demo.entity.User;
 import JobApplicationTracker.demo.repos.UserRepository;
 import jakarta.transaction.Transactional;
@@ -7,6 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -33,6 +35,7 @@ public class UserService {
             throw new IllegalArgumentException("Email already exists");
 
         User user = new User(trimmedEmail, passwordEncoder.encode(password));
+        user.setRole(Role.USER);
 
         return userRepo.save(user);
     }
@@ -40,6 +43,14 @@ public class UserService {
 
     public List<User> getAllUsers() {
         return userRepo.findAll();
+    }
+
+    @Transactional
+    public void promoteToAdmin(UUID id) {
+        User user = userRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + id));
+        user.setRole(Role.ADMIN);
+        userRepo.save(user);
     }
 
 }

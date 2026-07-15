@@ -28,6 +28,9 @@ public class User {
     @Email(message = "Must be a valid email")
     private String email;
 
+    @Enumerated(EnumType.ORDINAL)
+    private Role role;
+
 
     @NotBlank
     @Size(min = 8, max = 64, message = "Password must be 8–64 characters")
