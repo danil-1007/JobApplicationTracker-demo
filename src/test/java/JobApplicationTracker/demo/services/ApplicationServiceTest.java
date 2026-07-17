@@ -6,8 +6,10 @@ import JobApplicationTracker.demo.entity.JobApplication;
 import JobApplicationTracker.demo.entity.User;
 import JobApplicationTracker.demo.repos.CompanyRepository;
 import JobApplicationTracker.demo.repos.JobRepository;
+import JobApplicationTracker.demo.exception.ResourceNotFoundException;
 import JobApplicationTracker.demo.repos.UserRepository;
 import org.springframework.security.core.Authentication;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,7 +18,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,7 +25,6 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,9 +38,6 @@ class ApplicationServiceTest {
 
     @Mock
     private CompanyRepository companyRepo;
-
-    @Mock
-    private PasswordEncoder passwordEncoder;
 
     @InjectMocks
     private ApplicationService applicationService;
@@ -62,6 +59,12 @@ class ApplicationServiceTest {
         testUser = new User("test@example.com", "encodedPassword");
         testCompany = new Company();
         testCompany.setCompanyName("Google");
+    }
+
+    @AfterEach
+    void tearDown() {
+        // SecurityContext is a static ThreadLocal — clear it so state doesn't leak between tests.
+        SecurityContextHolder.clearContext();
     }
 
     @Test
@@ -140,7 +143,7 @@ class ApplicationServiceTest {
         //ACT + ASSERT
 
         assertThatThrownBy(() -> applicationService.deleteApplication(id))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Application not found");
 
     }
@@ -178,7 +181,7 @@ class ApplicationServiceTest {
         //ACT + ASSERT
 
         assertThatThrownBy(() -> applicationService.getApplicationForCurrentUser(id))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Application not found");
     }
 
@@ -262,7 +265,7 @@ class ApplicationServiceTest {
 
         //ACT + ASSERT
         assertThatThrownBy(() -> applicationService.updateApplication(id, "Google", "Java Developer", ApplicationStatus.APPLIED))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Application not found");
 
         verify(jobRepo, never()).save(any());

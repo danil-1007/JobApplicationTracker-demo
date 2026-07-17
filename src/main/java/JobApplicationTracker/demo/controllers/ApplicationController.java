@@ -7,7 +7,6 @@ import JobApplicationTracker.demo.forms.JobApplicationForm;
 import JobApplicationTracker.demo.repos.JobRepository;
 import JobApplicationTracker.demo.services.ApplicationService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -20,7 +19,7 @@ public class ApplicationController {
 
 
 
-    private final  ApplicationService applicationService;
+    private final ApplicationService applicationService;
 
     public ApplicationController(ApplicationService applicationService) {
         this.applicationService = applicationService;
@@ -38,7 +37,8 @@ public class ApplicationController {
                          BindingResult bindingResult,
                          Model model
                          ){
-        model.addAttribute("statuses",ApplicationStatus.values());//more information about what id does and why pleas(paste it as notes)
+        // Re-populate the status dropdown so the view can render even when validation fails.
+        model.addAttribute("statuses", ApplicationStatus.values());
 
         if (bindingResult.hasErrors()) {
             return "jobApp";
