@@ -20,7 +20,7 @@ public class Company {
     @GeneratedValue(strategy =jakarta.persistence.GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "company_name")
+    @Column(name = "company_name", nullable = false, unique = true)
     private String companyName;
     private String website;
     private String location;
